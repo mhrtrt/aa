@@ -2,25 +2,39 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>প্রফেশনাল ফ্রেম এডিটর</title>
     <style>
         :root { --primary: #7ea3f2; --bg: #f8f9fa; --share-btn: #25D366; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); margin: 0; padding: 10px; }
-        .main-wrapper { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; max-width: 1100px; margin: 20px auto; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); margin: 0; padding: 10px; overflow-x: hidden; }
+        
+        .main-wrapper { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; max-width: 1100px; margin: 10px auto; }
+        
+        /* প্রিভিউ সেকশন */
         .preview-section { flex: 1; min-width: 320px; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; }
-        #canvas-container { position: relative; width: 100%; aspect-ratio: 1/1; background: #eee; overflow: hidden; border-radius: 8px; cursor: move; touch-action: none; }
+        #canvas-container { position: relative; width: 100%; aspect-ratio: 1/1; background: #eee; overflow: hidden; border-radius: 8px; cursor: move; touch-action: none; z-index: 1; }
         canvas { width: 100% !important; height: auto !important; display: block; }
-        .tools-section { width: 350px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+
+        /* টুলস সেকশন */
+        .tools-section { width: 350px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); z-index: 10; position: relative; }
         .tool-group { margin-bottom: 20px; border-bottom: 1px dashed #eee; padding-bottom: 15px; }
         .label-step { font-weight: bold; font-size: 14px; display: block; margin-bottom: 8px; color: #444; }
-        input[type="text"] { width: 92%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; outline: none; }
-        .btn-upload-box { border: 2px dashed #d1d9e6; padding: 15px; border-radius: 8px; cursor: pointer; text-align: center; }
+        
+        input[type="text"] { width: 92%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; outline: none; transition: 0.3s; }
+        input[type="text"]:focus { border-color: var(--primary); }
+        
+        .btn-upload-box { border: 2px dashed #d1d9e6; padding: 15px; border-radius: 8px; cursor: pointer; text-align: center; margin-bottom: 10px; }
         .zoom-slider { width: 100%; margin: 10px 0; cursor: pointer; }
-        .btn-action { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; margin-bottom: 10px; }
+        
+        .btn-action { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; margin-bottom: 10px; transition: 0.3s; display: block; -webkit-appearance: none; }
         .btn-download { background: var(--primary); color: white; }
-        .btn-share { background: var(--share-btn); color: white; font-size: 14px; }
-        @media (max-width: 768px) { .tools-section { width: 100%; order: 2; } .preview-section { order: 1; } }
+        .btn-share { background: var(--share-btn); color: white; }
+        .btn-action:active { transform: scale(0.98); opacity: 0.9; }
+
+        @media (max-width: 768px) {
+            .tools-section { width: 100%; order: 2; }
+            .preview-section { order: 1; }
+        }
     </style>
 </head>
 <body>
@@ -30,15 +44,17 @@
         <div id="canvas-container">
             <canvas id="canvas"></canvas>
         </div>
-        <p style="font-size: 12px; color: #999; margin-top: 10px;">ছবিটি আঙুল দিয়ে টেনে পজিশন ঠিক করুন</p>
+        <p style="font-size: 12px; color: #999; margin-top: 10px;">ছবিটি ড্র্যাগ করে পজিশন ঠিক করুন</p>
     </div>
 
     <div class="tools-section">
         <h3 style="margin-top:0">এডিটর টুলস</h3>
+        
         <div class="tool-group">
             <span class="label-step">১. আপনার নাম লিখুন</span>
             <input type="text" id="nameInput" value="আপনার নাম লিখুন" oninput="draw()">
         </div>
+
         <div class="tool-group">
             <span class="label-step">২. ছবি নির্বাচন করুন</span>
             <input type="file" id="upload" accept="image/*" style="display:none">
@@ -46,10 +62,12 @@
                 <span style="color:var(--primary); font-weight:bold;">+ ছবি আপলোড করুন</span>
             </div>
         </div>
+
         <div class="tool-group">
             <span class="label-step">৩. ছবি জুম করুন</span>
             <input type="range" id="zoom" class="zoom-slider" min="0.1" max="4" step="0.01" value="1">
         </div>
+
         <button class="btn-action btn-download" id="downloadBtn">⬇️ ছবি ডাউনলোড করুন</button>
         <button class="btn-action btn-share" id="shareBtn">📢 বন্ধুদের সাথে শেয়ার করুন <br><small>(WhatsApp & Messenger)</small></button>
     </div>
@@ -69,7 +87,6 @@
     let imgX = 0, imgY = 0, scale = 1;
     let isDragging = false, startX, startY;
 
-    // আপনার ফ্রেম ফাইলটি 'frame.png' নামে থাকতে হবে
     frameImg.src = 'frame.png'; 
     frameImg.onload = () => {
         canvas.width = 1000; 
@@ -87,6 +104,7 @@
             ctx.restore();
         }
         ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+        
         const nameText = nameInput.value;
         if (nameText) {
             ctx.textAlign = "center";
@@ -114,30 +132,54 @@
 
     zoomSlider.oninput = (e) => { scale = parseFloat(e.target.value); draw(); };
 
+    // উন্নত টাচ এবং ড্র্যাগ লজিক
     const container = document.getElementById('canvas-container');
     const getPos = (e) => e.touches ? e.touches[0] : e;
-    container.onmousedown = (e) => { isDragging = true; startX = getPos(e).clientX - imgX; startY = getPos(e).clientY - imgY; };
-    container.ontouchstart = (e) => { isDragging = true; startX = getPos(e).clientX - imgX; startY = getPos(e).clientY - imgY; };
-    window.onmousemove = (e) => { if(!isDragging) return; imgX = getPos(e).clientX - startX; imgY = getPos(e).clientY - startY; draw(); };
-    window.ontouchmove = (e) => { if(!isDragging) return; imgX = getPos(e).clientX - startX; imgY = getPos(e).clientY - startY; draw(); };
-    window.onmouseup = () => isDragging = false;
-    window.ontouchend = () => isDragging = false;
 
-    // --- অ্যাড এবং ডাউনলোড লজিক ---
-    downloadBtn.onclick = () => {
-        // ১. নিচে আপনার কপি করা স্মার্টলিঙ্কটি পেস্ট করুন
+    const startAction = (e) => {
+        isDragging = true;
+        const pos = getPos(e);
+        startX = pos.clientX - imgX;
+        startY = pos.clientY - imgY;
+    };
+
+    const moveAction = (e) => {
+        if(!isDragging) return;
+        if(e.touches) e.preventDefault(); // স্ক্রল আটকানোর জন্য
+        const pos = getPos(e);
+        imgX = pos.clientX - startX;
+        imgY = pos.clientY - startY;
+        draw();
+    };
+
+    const stopAction = () => isDragging = false;
+
+    container.addEventListener('mousedown', startAction);
+    container.addEventListener('touchstart', startAction, {passive: false});
+    window.addEventListener('mousemove', moveAction);
+    window.addEventListener('touchmove', moveAction, {passive: false});
+    window.addEventListener('mouseup', stopAction);
+    window.addEventListener('touchend', stopAction);
+
+    // অ্যাড এবং ডাউনলোড
+    downloadBtn.addEventListener('click', function(e) {
+        e.preventDefault();
         const adLink = "https://www.effectivegatecpm.com/zewgw0nx?key=ad60d7740586117e41b5ee131e47e262";
         
-        // ২. নতুন ট্যাবে বিজ্ঞাপন খুলবে
-        window.open(adLink, '_blank');
+        // বিজ্ঞাপনের ট্যাব খোলা
+        const win = window.open(adLink, '_blank');
+        if (win) win.focus();
 
-        // ৩. ছবি ডাউনলোড শুরু হবে
+        // ডাউনলোড শুরু
         const link = document.createElement('a');
         link.download = 'my_poster.png';
         link.href = canvas.toDataURL('image/png');
+        document.body.appendChild(link);
         link.click();
-    };
+        document.body.removeChild(link);
+    });
 
+    // শেয়ারিং
     shareBtn.onclick = async () => {
         const shareData = {
             title: 'আমার তৈরি পোষ্টার',

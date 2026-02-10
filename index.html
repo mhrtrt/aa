@@ -3,34 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>প্রফেশনাল ফ্রেম এডিটর</title>
+    <title>Perfect Frame Editor</title>
     <style>
-        body { font-family: sans-serif; text-align: center; background: #eef; margin: 0; padding: 20px; }
-        .container { background: #fff; padding: 20px; border-radius: 10px; display: inline-block; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        #wrapper { position: relative; width: 400px; height: 400px; margin: 20px auto; overflow: hidden; border: 2px dashed #ccc; cursor: move; }
-        canvas { position: absolute; top: 0; left: 0; }
+        body { font-family: sans-serif; text-align: center; background: #f4f4f9; margin: 0; padding: 20px; }
+        .container { background: #fff; padding: 20px; border-radius: 12px; display: inline-block; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 500px; }
+        #wrapper { position: relative; width: 100%; aspect-ratio: 1/1; margin: 20px auto; overflow: hidden; border: 2px solid #ddd; background: #eee; cursor: move; touch-action: none; }
+        canvas { width: 100% !important; height: auto !important; display: block; }
         .controls { margin-top: 15px; }
-        input[type="range"] { width: 80%; margin: 10px 0; }
-        .btn { background: #007bff; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .btn-save { background: #28a745; margin-top: 10px; }
+        input[type="range"] { width: 100%; margin: 15px 0; }
+        .btn { background: #007bff; color: #fff; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; margin-bottom: 10px; }
+        .btn-save { background: #28a745; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>ফ্রেম এডিটর (Zoom & Drag)</h2>
+    <h2>ফ্রেম এডিটর (Full Frame)</h2>
     
     <input type="file" id="upload" accept="image/*" style="display:none">
-    <button class="btn" onclick="document.getElementById('upload').click()">১. আপনার ছবি দিন</button>
+    <button class="btn" onclick="document.getElementById('upload').click()">১. আপনার ছবি আপলোড করুন</button>
 
     <div id="wrapper">
         <canvas id="canvas"></canvas>
     </div>
 
     <div class="controls">
-        <label>জুম করুন:</label><br>
-        <input type="range" id="zoom" min="0.1" max="3" step="0.01" value="1"><br>
-        <button class="btn btn-save" id="download">২. ডাউনলোড করুন</button>
+        <label>ছবি জুম করুন:</label><br>
+        <input type="range" id="zoom" min="0.1" max="4" step="0.01" value="1">
+        <button class="btn btn-save" id="download">২. ছবি ডাউনলোড করুন</button>
     </div>
 </div>
 
@@ -46,15 +46,18 @@
     let imgX = 0, imgY = 0, scale = 1;
     let isDragging = false, startX, startY;
 
-    // আপনার আপলোড করা ফ্রেমের নাম এখানে 'frame.png' হতে হবে
+    // Frame load hobar por canvas size fix kora
     frameImg.src = 'frame.png'; 
-    frameImg.onload = draw;
-
-    canvas.width = 800;
-    canvas.height = 800;
+    frameImg.onload = () => {
+        canvas.width = frameImg.width;
+        canvas.height = frameImg.height;
+        draw();
+    };
 
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // 1. User-er chhobi (Niche thakbe)
         if (userImg.src) {
             ctx.save();
             ctx.translate(canvas.width/2 + imgX, canvas.height/2 + imgY);
@@ -62,6 +65,8 @@
             ctx.drawImage(userImg, -userImg.width/2, -userImg.height/2);
             ctx.restore();
         }
+        
+        // 2. Frame (Opore thakbe ebong purota show korbe)
         ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
     }
 
@@ -69,7 +74,9 @@
         const reader = new FileReader();
         reader.onload = (f) => {
             userImg.onload = () => {
-                scale = canvas.width / userImg.width;
+                // Chhobi-ti frame-er size onujayi auto adjust kora
+                let ratio = Math.max(canvas.width / userImg.width, canvas.height / userImg.height);
+                scale = ratio;
                 zoomSlider.value = scale;
                 imgX = 0; imgY = 0;
                 draw();
@@ -84,31 +91,37 @@
         draw();
     };
 
-    // ড্র্যাগ বা পজিশন সরানোর কোড
+    // Position change korar logic
     const wrapper = document.getElementById('wrapper');
-    wrapper.onmousedown = (e) => { isDragging = true; startX = e.clientX - imgX; startY = e.clientY - imgY; };
-    window.onmouseup = () => isDragging = false;
-    window.onmousemove = (e) => {
+    const handleStart = (e) => {
+        isDragging = true;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        startX = clientX - imgX;
+        startY = clientY - imgY;
+    };
+    const handleMove = (e) => {
         if (!isDragging) return;
-        imgX = e.clientX - startX;
-        imgY = e.clientY - startY;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        imgX = clientX - startX;
+        imgY = clientY - startY;
         draw();
     };
+    const handleEnd = () => isDragging = false;
 
-    // মোবাইল টাচ সাপোর্ট
-    wrapper.ontouchstart = (e) => { isDragging = true; startX = e.touches[0].clientX - imgX; startY = e.touches[0].clientY - imgY; };
-    window.ontouchend = () => isDragging = false;
-    window.ontouchmove = (e) => {
-        if (!isDragging) return;
-        imgX = e.touches[0].clientX - startX;
-        imgY = e.touches[0].clientY - startY;
-        draw();
-    };
+    wrapper.onmousedown = handleStart;
+    window.onmousemove = handleMove;
+    window.onmouseup = handleEnd;
+
+    wrapper.ontouchstart = handleStart;
+    window.ontouchmove = handleMove;
+    window.ontouchend = handleEnd;
 
     downloadBtn.onclick = () => {
         const link = document.createElement('a');
-        link.download = 'frame_photo.png';
-        link.href = canvas.toDataURL();
+        link.download = 'framed_photo.png';
+        link.href = canvas.toDataURL('image/png');
         link.click();
     };
 </script>

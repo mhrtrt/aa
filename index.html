@@ -36,9 +36,8 @@
         <h3>এডিটর টুলস</h3>
         
         <div class="tool-group">
-            <span class="label-step">১. টেক্সট লিখুন (ঐচ্ছিক)</span>
-            <input type="text" id="line1" placeholder="প্রথম লাইন (বড় ও বোল্ড)" oninput="draw()">
-            <input type="text" id="line2" placeholder="দ্বিতীয় লাইন (ছোট ও চিকন)" oninput="draw()">
+            <span class="label-step">১. টেক্সট লিখুন</span>
+            <input type="text" id="line1" placeholder="এখানে আপনার নাম লিখুন" oninput="draw()">
         </div>
 
         <div class="tool-group">
@@ -65,7 +64,6 @@
     const zoomSlider = document.getElementById('zoom');
     const downloadBtn = document.getElementById('download');
     const line1Input = document.getElementById('line1');
-    const line2Input = document.getElementById('line2');
 
     let userImg = new Image();
     let frameImg = new Image();
@@ -74,7 +72,7 @@
 
     frameImg.src = 'frame.png'; 
     frameImg.onload = () => {
-        canvas.width = 1000; // High resolution
+        canvas.width = 1000; 
         canvas.height = 1000;
         draw();
     };
@@ -82,7 +80,6 @@
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // ১. ইউজার ছবি
         if (userImg.src) {
             ctx.save();
             ctx.translate(canvas.width/2 + imgX, canvas.height/2 + imgY);
@@ -91,25 +88,16 @@
             ctx.restore();
         }
 
-        // ২. ফ্রেম
         ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
 
-        // ৩. টেক্সট লিখা (সবার উপরে)
+        // টেক্সট সেটিংস (White & Bottom Padding 10px equivalent)
         const text1 = line1Input.value;
-        const text2 = line2Input.value;
-
-        ctx.textAlign = "center";
-        
         if (text1) {
-            ctx.font = "bold 45px 'Segoe UI', 'SolaimanLipi', sans-serif";
-            ctx.fillStyle = "black"; // আপনি চাইলে এখানে কালার কোড বদলাতে পারেন
-            ctx.fillText(text1, canvas.width/2, canvas.height - 100);
-        }
-
-        if (text2) {
-            ctx.font = "30px 'Segoe UI', 'SolaimanLipi', sans-serif";
-            ctx.fillStyle = "#555";
-            ctx.fillText(text2, canvas.width/2, canvas.height - 50);
+            ctx.textAlign = "center";
+            ctx.font = "bold 50px 'Segoe UI', 'SolaimanLipi', sans-serif";
+            ctx.fillStyle = "white"; // টেক্সট কালার সাদা
+            // canvas.height থেকে ৬০ পিক্সেল উপরে (ফন্ট সাইজ ৫০ + ১০ পিক্সেল প্যাডিং)
+            ctx.fillText(text1, canvas.width/2, canvas.height - 30);
         }
     }
 
@@ -131,7 +119,6 @@
 
     zoomSlider.oninput = (e) => { scale = parseFloat(e.target.value); draw(); };
 
-    // Dragging Logic
     const container = document.getElementById('canvas-container');
     const getPos = (e) => e.touches ? e.touches[0] : e;
     const start = (e) => { isDragging = true; startX = getPos(e).clientX - imgX; startY = getPos(e).clientY - imgY; };
@@ -143,8 +130,8 @@
     window.onmouseup = stop; window.ontouchend = stop;
 
     downloadBtn.onclick = () => {
-        // Adsterra Ad
-        window.open("আপনার_ADSTERRA_DIRECT_LINK_এখানে_দিন", '_blank');
+        // আপনার Adsterra লিঙ্ক এখানে দিতে ভুলবেন না
+        // window.open("YOUR_LINK_HERE", '_blank');
         
         const link = document.createElement('a');
         link.download = 'poster.png';

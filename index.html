@@ -14,12 +14,13 @@
         .tools-section { width: 350px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         .tool-group { margin-bottom: 20px; border-bottom: 1px dashed #eee; padding-bottom: 15px; }
         .label-step { font-weight: bold; font-size: 14px; display: block; margin-bottom: 8px; }
-        input[type="text"] { width: 92%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; font-size: 14px; }
+        input[type="text"] { width: 92%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; font-size: 14px; outline: none; }
+        input[type="text"]:focus { border-color: var(--primary); }
         .btn-upload-box { border: 2px dashed #d1d9e6; padding: 15px; border-radius: 8px; cursor: pointer; text-align: center; }
         .zoom-slider { width: 100%; margin: 10px 0; }
         .btn-action { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; margin-bottom: 10px; }
         .btn-download { background: var(--primary); color: white; }
-        @media (max-width: 768px) { .tools-section { width: 100%; } }
+        @media (max-width: 768px) { .tools-section { width: 100%; order: 2; } .preview-section { order: 1; } }
     </style>
 </head>
 <body>
@@ -36,8 +37,8 @@
         <h3>এডিটর টুলস</h3>
         
         <div class="tool-group">
-            <span class="label-step">১. টেক্সট লিখুন</span>
-            <input type="text" id="line1" placeholder="এখানে আপনার নাম লিখুন" oninput="draw()">
+            <span class="label-step">১. আপনার নাম লিখুন</span>
+            <input type="text" id="line1" value="আপনার নাম লিখুন" oninput="draw()">
         </div>
 
         <div class="tool-group">
@@ -90,14 +91,16 @@
 
         ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
 
-        // টেক্সট সেটিংস (White & Bottom Padding 10px equivalent)
+        // টেক্সট ড্রয়িং
         const text1 = line1Input.value;
         if (text1) {
             ctx.textAlign = "center";
-            ctx.font = "bold 50px 'Segoe UI', 'SolaimanLipi', sans-serif";
-            ctx.fillStyle = "white"; // টেক্সট কালার সাদা
-            // canvas.height থেকে ৬০ পিক্সেল উপরে (ফন্ট সাইজ ৫০ + ১০ পিক্সেল প্যাডিং)
-            ctx.fillText(text1, canvas.width/2, canvas.height - 30);
+            ctx.font = "bold 50px 'Segoe UI', 'SolaimanLipi', Arial, sans-serif";
+            ctx.fillStyle = "white"; 
+            
+            // নিচের প্যাডিং ১৭ পিক্সেল (পিক্সেল হিসেবে প্রায় ১৭-২০ সেট করা হয়েছে)
+            // ১০২৪ ক্যানভাস হলে ১৭ প্যাডিং মানে প্রায় নিচে ৪৭-৫০ এর দিকে রাখা
+            ctx.fillText(text1, canvas.width/2, canvas.height - 40); 
         }
     }
 
@@ -130,11 +133,9 @@
     window.onmouseup = stop; window.ontouchend = stop;
 
     downloadBtn.onclick = () => {
-        // আপনার Adsterra লিঙ্ক এখানে দিতে ভুলবেন না
-        // window.open("YOUR_LINK_HERE", '_blank');
-        
+        // বিজ্ঞাপন লিঙ্ক থাকলে এখানে দেবেন
         const link = document.createElement('a');
-        link.download = 'poster.png';
+        link.download = 'edited_poster.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
     };

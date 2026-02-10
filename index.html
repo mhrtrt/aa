@@ -5,42 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>প্রফেশনাল ফ্রেম এডিটর</title>
     <style>
-        :root { --primary: #7ea3f2; --secondary: #28a745; --bg: #f8f9fa; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #333; }
-        
-        /* Main Layout */
+        :root { --primary: #7ea3f2; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); margin: 0; padding: 10px; }
         .main-wrapper { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; max-width: 1100px; margin: 20px auto; }
-        
-        /* Left Side - Preview */
         .preview-section { flex: 1; min-width: 320px; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; }
         #canvas-container { position: relative; width: 100%; aspect-ratio: 1/1; background: #eee; overflow: hidden; border-radius: 8px; cursor: move; touch-action: none; }
         canvas { width: 100% !important; height: auto !important; display: block; }
-
-        /* Right Side - Tools */
         .tools-section { width: 350px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        h2 { margin-top: 0; font-size: 20px; color: #2c3e50; }
-        .instruction { font-size: 13px; color: #7f8c8d; margin-bottom: 20px; }
-
-        .tool-group { margin-bottom: 25px; border-bottom: 1px dashed #eee; padding-bottom: 15px; }
-        .label-step { font-weight: bold; font-size: 14px; display: block; margin-bottom: 10px; }
-
-        /* Buttons & Inputs */
-        .btn-upload-box { border: 2px dashed #d1d9e6; padding: 20px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
-        .btn-upload-box:hover { background: #f0f4ff; border-color: var(--primary); }
-        .upload-icon { font-size: 30px; color: var(--primary); display: block; margin-bottom: 5px; }
-        
-        .zoom-slider { width: 100%; margin: 15px 0; cursor: pointer; height: 6px; border-radius: 5px; }
-        
-        .btn-action { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .tool-group { margin-bottom: 20px; border-bottom: 1px dashed #eee; padding-bottom: 15px; }
+        .label-step { font-weight: bold; font-size: 14px; display: block; margin-bottom: 8px; }
+        input[type="text"] { width: 92%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; font-size: 14px; }
+        .btn-upload-box { border: 2px dashed #d1d9e6; padding: 15px; border-radius: 8px; cursor: pointer; text-align: center; }
+        .zoom-slider { width: 100%; margin: 10px 0; }
+        .btn-action { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; margin-bottom: 10px; }
         .btn-download { background: var(--primary); color: white; }
-        .btn-reset { background: white; border: 1px solid #ddd; color: #666; font-size: 14px; }
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .tools-section { width: 100%; order: 2; }
-            .preview-section { order: 1; }
-            .main-wrapper { margin-top: 10px; }
-        }
+        @media (max-width: 768px) { .tools-section { width: 100%; } }
     </style>
 </head>
 <body>
@@ -50,29 +29,32 @@
         <div id="canvas-container">
             <canvas id="canvas"></canvas>
         </div>
-        <p style="font-size: 12px; color: #999; margin-top: 10px;">ছবিটি মাউস বা আঙুল দিয়ে ড্র্যাগ করে পজিশন করুন</p>
+        <p style="font-size: 12px; color: #999; margin-top: 10px;">ছবিটি ড্র্যাগ করে পজিশন করুন</p>
     </div>
 
     <div class="tools-section">
-        <h2>এডিটর টুলস</h2>
-        <p class="instruction">আপনার ছবি ফ্রেমের সাথে মানানসই করুন</p>
+        <h3>এডিটর টুলস</h3>
+        
+        <div class="tool-group">
+            <span class="label-step">১. টেক্সট লিখুন (ঐচ্ছিক)</span>
+            <input type="text" id="line1" placeholder="প্রথম লাইন (বড় ও বোল্ড)" oninput="draw()">
+            <input type="text" id="line2" placeholder="দ্বিতীয় লাইন (ছোট ও চিকন)" oninput="draw()">
+        </div>
 
         <div class="tool-group">
-            <span class="label-step">১. ছবি নির্বাচন করুন</span>
+            <span class="label-step">২. ছবি নির্বাচন করুন</span>
             <input type="file" id="upload" accept="image/*" style="display:none">
             <div class="btn-upload-box" onclick="document.getElementById('upload').click()">
-                <span class="upload-icon">☁️</span>
-                <span id="file-name" style="color:#7ea3f2">ছবি নির্বাচন করুন</span>
+                <span id="file-name" style="color:var(--primary)">ছবি আপলোড করুন</span>
             </div>
         </div>
 
         <div class="tool-group">
-            <span class="label-step">২. জুম ইন/আউট</span>
+            <span class="label-step">৩. জুম ইন/আউট</span>
             <input type="range" id="zoom" class="zoom-slider" min="0.1" max="4" step="0.01" value="1">
         </div>
 
-        <button class="btn-action btn-download" id="download">⬇️ ছবি ডাউনলোড করুন</button>
-        <button class="btn-action btn-reset" onclick="location.reload()">🔄 রিসেট করুন</button>
+        <button class="btn-action btn-download" id="download">ছবি ডাউনলোড করুন</button>
     </div>
 </div>
 
@@ -82,23 +64,25 @@
     const upload = document.getElementById('upload');
     const zoomSlider = document.getElementById('zoom');
     const downloadBtn = document.getElementById('download');
-    const fileNameText = document.getElementById('file-name');
+    const line1Input = document.getElementById('line1');
+    const line2Input = document.getElementById('line2');
 
     let userImg = new Image();
     let frameImg = new Image();
     let imgX = 0, imgY = 0, scale = 1;
     let isDragging = false, startX, startY;
 
-    // ১. আপনার ফ্রেম লোড করা
     frameImg.src = 'frame.png'; 
     frameImg.onload = () => {
-        canvas.width = frameImg.width;
-        canvas.height = frameImg.height;
+        canvas.width = 1000; // High resolution
+        canvas.height = 1000;
         draw();
     };
 
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // ১. ইউজার ছবি
         if (userImg.src) {
             ctx.save();
             ctx.translate(canvas.width/2 + imgX, canvas.height/2 + imgY);
@@ -106,13 +90,32 @@
             ctx.drawImage(userImg, -userImg.width/2, -userImg.height/2);
             ctx.restore();
         }
+
+        // ২. ফ্রেম
         ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+
+        // ৩. টেক্সট লিখা (সবার উপরে)
+        const text1 = line1Input.value;
+        const text2 = line2Input.value;
+
+        ctx.textAlign = "center";
+        
+        if (text1) {
+            ctx.font = "bold 45px 'Segoe UI', 'SolaimanLipi', sans-serif";
+            ctx.fillStyle = "black"; // আপনি চাইলে এখানে কালার কোড বদলাতে পারেন
+            ctx.fillText(text1, canvas.width/2, canvas.height - 100);
+        }
+
+        if (text2) {
+            ctx.font = "30px 'Segoe UI', 'SolaimanLipi', sans-serif";
+            ctx.fillStyle = "#555";
+            ctx.fillText(text2, canvas.width/2, canvas.height - 50);
+        }
     }
 
     upload.onchange = (e) => {
         const file = e.target.files[0];
         if(!file) return;
-        fileNameText.innerText = file.name;
         const reader = new FileReader();
         reader.onload = (f) => {
             userImg.onload = () => {
@@ -126,35 +129,28 @@
         reader.readAsDataURL(file);
     };
 
-    zoomSlider.oninput = (e) => {
-        scale = parseFloat(e.target.value);
-        draw();
-    };
+    zoomSlider.oninput = (e) => { scale = parseFloat(e.target.value); draw(); };
 
-    // Drag Logic
+    // Dragging Logic
     const container = document.getElementById('canvas-container');
     const getPos = (e) => e.touches ? e.touches[0] : e;
-    
-    container.addEventListener('mousedown', (e) => { isDragging = true; startX = getPos(e).clientX - imgX; startY = getPos(e).clientY - imgY; });
-    container.addEventListener('touchstart', (e) => { isDragging = true; startX = getPos(e).clientX - imgX; startY = getPos(e).clientY - imgY; });
-    
-    window.addEventListener('mousemove', (e) => { if(!isDragging) return; imgX = getPos(e).clientX - startX; imgY = getPos(e).clientY - startY; draw(); });
-    window.addEventListener('touchmove', (e) => { if(!isDragging) return; imgX = getPos(e).clientX - startX; imgY = getPos(e).clientY - startY; draw(); });
-    
-    window.addEventListener('mouseup', () => isDragging = false);
-    window.addEventListener('touchend', () => isDragging = false);
+    const start = (e) => { isDragging = true; startX = getPos(e).clientX - imgX; startY = getPos(e).clientY - imgY; };
+    const move = (e) => { if(!isDragging) return; imgX = getPos(e).clientX - startX; imgY = getPos(e).clientY - startY; draw(); };
+    const stop = () => isDragging = false;
 
-    // ৪. Adsterra Direct Link বিজ্ঞাপন
+    container.onmousedown = start; container.ontouchstart = start;
+    window.onmousemove = move; window.ontouchmove = move;
+    window.onmouseup = stop; window.ontouchend = stop;
+
     downloadBtn.onclick = () => {
-        const adLink = "আপনার_ADSTERRA_DIRECT_LINK_এখানে_দিন"; 
-        window.open(adLink, '_blank'); // নতুন উইন্ডোতে অ্যাড খুলবে
-
+        // Adsterra Ad
+        window.open("আপনার_ADSTERRA_DIRECT_LINK_এখানে_দিন", '_blank');
+        
         const link = document.createElement('a');
-        link.download = 'edited_photo.png';
+        link.download = 'poster.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
     };
 </script>
-
 </body>
 </html>

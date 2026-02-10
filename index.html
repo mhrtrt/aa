@@ -127,3 +127,138 @@
 </script>
 </body>
 </html>
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfect Frame Editor</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #f4f4f9; margin: 0; padding: 20px; }
+        .container { background: #fff; padding: 20px; border-radius: 12px; display: inline-block; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 500px; }
+        #wrapper { position: relative; width: 100%; aspect-ratio: 1/1; margin: 20px auto; overflow: hidden; border: 2px solid #ddd; background: #eee; cursor: move; touch-action: none; }
+        canvas { width: 100% !important; height: auto !important; display: block; }
+        .controls { margin-top: 15px; }
+        input[type="range"] { width: 100%; margin: 15px 0; }
+        .btn { background: #007bff; color: #fff; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; margin-bottom: 10px; }
+        .btn-save { background: #28a745; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>ফ্রেম এডিটর (Full Frame)</h2>
+    
+    <input type="file" id="upload" accept="image/*" style="display:none">
+    <button class="btn" onclick="document.getElementById('upload').click()">১. আপনার ছবি আপলোড করুন</button>
+
+    <div id="wrapper">
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="controls">
+        <label>ছবি জুম করুন:</label><br>
+        <input type="range" id="zoom" min="0.1" max="4" step="0.01" value="1">
+        <button class="btn btn-save" id="download">২. ছবি ডাউনলোড করুন</button>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const upload = document.getElementById('upload');
+    const zoomSlider = document.getElementById('zoom');
+    const downloadBtn = document.getElementById('download');
+
+    let userImg = new Image();
+    let frameImg = new Image();
+    let imgX = 0, imgY = 0, scale = 1;
+    let isDragging = false, startX, startY;
+
+    // Frame load hobar por canvas size fix kora
+    frameImg.src = 'frame.png'; 
+    frameImg.onload = () => {
+        canvas.width = frameImg.width;
+        canvas.height = frameImg.height;
+        draw();
+    };
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // 1. User-er chhobi (Niche thakbe)
+        if (userImg.src) {
+            ctx.save();
+            ctx.translate(canvas.width/2 + imgX, canvas.height/2 + imgY);
+            ctx.scale(scale, scale);
+            ctx.drawImage(userImg, -userImg.width/2, -userImg.height/2);
+            ctx.restore();
+        }
+        
+        // 2. Frame (Opore thakbe ebong purota show korbe)
+        ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+    }
+
+    upload.onchange = (e) => {
+        const reader = new FileReader();
+        reader.onload = (f) => {
+            userImg.onload = () => {
+                // Chhobi-ti frame-er size onujayi auto adjust kora
+                let ratio = Math.max(canvas.width / userImg.width, canvas.height / userImg.height);
+                scale = ratio;
+                zoomSlider.value = scale;
+                imgX = 0; imgY = 0;
+                draw();
+            };
+            userImg.src = f.target.result;
+        };
+        reader.readAsDataURL(e.target.files[0]);
+    };
+
+    zoomSlider.oninput = (e) => {
+        scale = parseFloat(e.target.value);
+        draw();
+    };
+
+    // Position change korar logic
+    const wrapper = document.getElementById('wrapper');
+    const handleStart = (e) => {
+        isDragging = true;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        startX = clientX - imgX;
+        startY = clientY - imgY;
+    };
+    const handleMove = (e) => {
+        if (!isDragging) return;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        imgX = clientX - startX;
+        imgY = clientY - startY;
+        draw();
+    };
+    const handleEnd = () => isDragging = false;
+
+    wrapper.onmousedown = handleStart;
+    window.onmousemove = handleMove;
+    window.onmouseup = handleEnd;
+
+    wrapper.ontouchstart = handleStart;
+    window.ontouchmove = handleMove;
+    window.ontouchend = handleEnd;
+
+    downloadBtn.onclick = () => {
+        const link = document.createElement('a');
+        link.download = 'framed_photo.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    };
+</script>
+</body>
+</html>
+
